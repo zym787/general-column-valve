@@ -305,14 +305,14 @@ static cmd_status_t cmd_move_handler(cmd_args_t *args, char *response)
         } else if (args->count == 1) {
                 // 单参数：步数
                 int steps = atoi(args->values[0]);
-                sprintf(response, "Moving motor %d steps at default speed", steps);
+                sprintf(response, "1 Moving motor %d steps at default speed", steps);
                 // 这里可以调用步进电机驱动函数
                 // Stepper_Move(&motor1, steps);
         } else if (args->count == 2) {
                 // 两参数：步数，速度
                 int steps = atoi(args->values[0]);
                 int speed = atoi(args->values[1]);
-                sprintf(response, "Moving motor %d steps at %d RPM", steps, speed);
+                sprintf(response, "2 Moving motor %d steps at %d RPM", steps, speed);
                 // 这里可以调用步进电机驱动函数
                 // Stepper_SetSpeed(&motor1, speed);
                 // Stepper_Move(&motor1, steps);
@@ -322,7 +322,7 @@ static cmd_status_t cmd_move_handler(cmd_args_t *args, char *response)
                 int steps = atoi(args->values[1]);
                 int speed = atoi(args->values[2]);
                 stepper_set_target_position(channel, steps, speed);
-                sprintf(response, "Moving motor%d  %d steps at %d step/s", channel, steps, speed);
+                sprintf(response, "3 Moving motor%d  %d steps at %d step/s", channel, steps, speed);
                 // 这里可以调用步进电机驱动函数
                 // Stepper_MoveAdvanced(&motor1, steps, speed, accel);
         } else {

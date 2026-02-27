@@ -59,7 +59,7 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, DIR3_Pin|LED1_G_Pin|STEP3_Pin|ENA4_Pin
-                          |DIR4_Pin, GPIO_PIN_RESET);
+                          |DIR4_Pin|STEP1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : ENA1_Pin DIR1_Pin */
   GPIO_InitStruct.Pin = ENA1_Pin|DIR1_Pin;
@@ -95,8 +95,8 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : DIR3_Pin ENA4_Pin DIR4_Pin */
-  GPIO_InitStruct.Pin = DIR3_Pin|ENA4_Pin|DIR4_Pin;
+  /*Configure GPIO pins : DIR3_Pin ENA4_Pin DIR4_Pin STEP1_Pin */
+  GPIO_InitStruct.Pin = DIR3_Pin|ENA4_Pin|DIR4_Pin|STEP1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

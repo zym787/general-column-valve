@@ -16,7 +16,7 @@
 #ifndef __BSP_MODBUS_H
 #define __BSP_MODBUS_H
 
-#define DEBUG_MB    1   ///是否在串口1输出每次232/485串口接收到的数据
+#define DEBUG_MB    2   ///是否在串口1输出每次232/485串口接收到的数据
 #define IGNORE_MB   0   ///是否屏蔽Modbus
 
 /* 保持寄存器起始地址 */

@@ -52,8 +52,8 @@
 #endif
 
 #if DEBUG_BSP == 1
-#define bsp_println(format, ...)        printf("[%20s:%4d] BSP(%6d)  " format "\r\n", FILE_NAME2, __LINE__, HAL_GetTick()/100, ##__VA_ARGS__)
-#define bsp_printf(format, ...)         printf("[%20s:%4d] BSP(%6d)  " format, FILE_NAME2, __LINE__, HAL_GetTick()/100, ##__VA_ARGS__)
+#define bsp_println(format, ...)        printf("[%20s:%4d] BSP(%6d)  " format "\r\n", FILE_NAME2, __LINE__, HAL_GetTick(), ##__VA_ARGS__)
+#define bsp_printf(format, ...)         printf("[%20s:%4d] BSP(%6d)  " format, FILE_NAME2, __LINE__, HAL_GetTick(), ##__VA_ARGS__)
 #else
 #define bsp_println(format, ...)
 #define bsp_printf(format, ...)

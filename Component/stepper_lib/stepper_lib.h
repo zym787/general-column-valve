@@ -90,18 +90,21 @@ typedef struct {
 
 // 函数声明
 void stepper_init(void);
-int8_t stepper_add_motor(uint8_t _index, GPIO_TypeDef *_step_port,
+int8_t stepper_add_motor(STEPPER_INDEX_E _index, GPIO_TypeDef *_step_port,
                          uint16_t _step_pin, GPIO_TypeDef *_dir_port,
                          uint16_t _dir_pin, GPIO_TypeDef *_enable_port,
-                         uint16_t _enable_pin, uint8_t _en_active_high);
-void stepper_set_target_position(uint8_t _index, int32_t _position,
-                                 uint32_t _speed);
-void stepper_set_speed_range(uint8_t _index, uint32_t _min_speed,
+                         uint16_t _enable_pin,
+                         STEPPER_ENA_ACT_E _en_active_high);
+void stepper_enable_motor(STEPPER_INDEX_E _index, STEPPER_ENABLE_E _enable);
+void stepper_set_direction(STEPPER_INDEX_E _index, STEPPER_DIR_E _direction);
+void stepper_set_speed_range(STEPPER_INDEX_E _index, uint32_t _min_speed,
                              uint32_t _max_speed);
-int32_t stepper_get_position(uint8_t _index);
-uint8_t stepper_is_finished(uint8_t _index);
-void stepper_enable_motor(uint8_t _index, STEPPER_ENABLE_E _enable);
-void stepper_set_direction(uint8_t _index, STEPPER_DIR_E _direction);
+void stepper_set_speed(STEPPER_INDEX_E _index, uint32_t _speed);
+void stepper_set_target_position(STEPPER_INDEX_E _index, int32_t _position,
+                                 uint32_t _speed);
+int32_t stepper_get_position(STEPPER_INDEX_E _index);
+STEPPER_RUN_E stepper_is_finished(STEPPER_INDEX_E _index);
+void stepper_stop(STEPPER_INDEX_E _index);
 void stepper_stop_all(void);
 extern void stepper_timer_callback(void);
 

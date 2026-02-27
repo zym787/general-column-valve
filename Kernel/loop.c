@@ -52,8 +52,8 @@ void kernel_TaskStart(void)
         /// 任务3  电机命令执行进程 43ms
         bsp_StartAutoTimer(TASK_INDEX_3, 43);
 
-        // /// 任务4  Modbus解析进程 30ms
-        // bsp_StartAutoTimer(TASK_INDEX_4, 1021);
+        /// 任务4  Modbus解析进程 30ms
+        // bsp_StartAutoTimer(TASK_INDEX_4, 121);
 
         /// 任务5  保活进程 1000ms 1Hz
         // bsp_StartAutoTimer(TASK_INDEX_5, 1001);
@@ -88,7 +88,7 @@ void loop(void)
 
         bsp_println("Start Task Scheduling");
 
-        bsp_MotorControlTask();
+        // bsp_MotorControlTask();
 
         /* Infinite FOR Circulation */
         for (;;) {
@@ -97,17 +97,33 @@ void loop(void)
 
                 /* 任务1 */
                 if (bsp_CheckTimer(TASK_INDEX_1)) {
+                        bsp_println("Sec: %d", HAL_GetTick() / 1000);
+                        // stepper_task();
+                        // HAL_GPIO_TogglePin(STEP1_GPIO_Port, STEP1_Pin);
+                        // HAL_GPIO_TogglePin(STEP2_GPIO_Port, STEP2_Pin);
+                        // HAL_GPIO_TogglePin(STEP3_GPIO_Port, STEP3_Pin);
+                        // HAL_GPIO_TogglePin(STEP4_GPIO_Port, STEP4_Pin);
+
                         // bsp_LedToggle(LED_GREEN);
                 }
 
                 /* 任务2 */
                 if (bsp_CheckTimer(TASK_INDEX_2)) {
                         bsp_MotorCmdTask();
+                        // bsp_MotorControl();
+                        // HAL_GPIO_TogglePin(DIR1_GPIO_Port, DIR1_Pin);
+                        // HAL_GPIO_TogglePin(DIR2_GPIO_Port, DIR2_Pin);
+                        // HAL_GPIO_TogglePin(DIR3_GPIO_Port, DIR3_Pin);
+                        // HAL_GPIO_TogglePin(DIR4_GPIO_Port, DIR4_Pin);
                 }
 
                 /* 任务3 */
                 if (bsp_CheckTimer(TASK_INDEX_3)) {
                         bsp_MotorTask();
+                        // HAL_GPIO_TogglePin(ENA1_GPIO_Port, ENA1_Pin);
+                        // HAL_GPIO_TogglePin(ENA2_GPIO_Port, ENA2_Pin);
+                        // HAL_GPIO_TogglePin(ENA3_GPIO_Port, ENA3_Pin);
+                        // HAL_GPIO_TogglePin(ENA4_GPIO_Port, ENA4_Pin);
                 }
 
                 /* 任务4 */
