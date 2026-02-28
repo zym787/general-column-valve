@@ -310,18 +310,21 @@ static cmd_status_t cmd_move_handler(cmd_args_t *args, char *response)
                 // Stepper_Move(&motor1, steps);
         } else if (args->count == 2) {
                 // 两参数：步数，速度
-                int steps = atoi(args->values[0]);
-                int speed = atoi(args->values[1]);
-                sprintf(response, "2 Moving motor %d steps at %d RPM", steps, speed);
+                int channel = atoi(args->values[0]);
+                int steps = atoi(args->values[1]);
+                sprintf(response, "2 Moving motor[%d] %d steps", channel, steps);
                 // 这里可以调用步进电机驱动函数
                 // Stepper_SetSpeed(&motor1, speed);
                 // Stepper_Move(&motor1, steps);
+                // sl_PulseStart(channel, steps);
         } else if (args->count == 3) {
                 // 三参数：通道,步数，速度
                 uint8_t channel = atoi(args->values[0]);
                 int steps = atoi(args->values[1]);
                 int speed = atoi(args->values[2]);
-                stepper_set_target_position(channel, steps, speed);
+                // stepper_set_target_position(channel, steps, speed);
+                sl_TimerSetSpeed(speed);
+                sl_PulseStart(channel, steps);
                 sprintf(response, "3 Moving motor%d  %d steps at %d step/s", channel, steps, speed);
                 // 这里可以调用步进电机驱动函数
                 // Stepper_MoveAdvanced(&motor1, steps, speed, accel);

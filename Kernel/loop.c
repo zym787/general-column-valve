@@ -97,14 +97,14 @@ void loop(void)
 
                 /* 任务1 */
                 if (bsp_CheckTimer(TASK_INDEX_1)) {
-                        bsp_println("Sec: %d", HAL_GetTick() / 1000);
+                        // bsp_println("Sec: %d", HAL_GetTick() / 1000);
                         // stepper_task();
                         // HAL_GPIO_TogglePin(STEP1_GPIO_Port, STEP1_Pin);
                         // HAL_GPIO_TogglePin(STEP2_GPIO_Port, STEP2_Pin);
                         // HAL_GPIO_TogglePin(STEP3_GPIO_Port, STEP3_Pin);
                         // HAL_GPIO_TogglePin(STEP4_GPIO_Port, STEP4_Pin);
 
-                        // bsp_LedToggle(LED_GREEN);
+                        bsp_LedToggle(LED_RED);
                 }
 
                 /* 任务2 */

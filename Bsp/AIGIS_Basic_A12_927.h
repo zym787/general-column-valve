@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 /* PCB°æ±¾ */
-#define AIGIS_BASIC_BOARD_VR                "A12-929-A"
+#define AIGIS_BASIC_BOARD_VR                "A12-927-A&A12-928-A"
 /* PCBÃèÊö */
 #define AIGIS_BASIC_BOARD_DESCRIPTION       "Control and Display Panel"
 

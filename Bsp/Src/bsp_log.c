@@ -40,7 +40,7 @@ void bsp_LogPrintfInfo(void)
         CPU_Sn1 = HAL_GetUIDw1();
         CPU_Sn2 = HAL_GetUIDw2();
 
-        printf("* CPU       : STM32F030K6T6  LQFP32   Max Freq.%dMHz\r\n", SystemCoreClock / 1000000);
+        printf("* CPU       : STM32F103C8T6  LQFP48   Max Freq.%dMHz\r\n", SystemCoreClock / 1000000);
 
         printf("* UID       : %08X %08X %08X\r\n", CPU_Sn2, CPU_Sn1, CPU_Sn0);
 

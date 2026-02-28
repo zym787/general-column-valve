@@ -1,5 +1,9 @@
 {
         "recommendations": [
                 "spencerwmiles.vscode-task-buttons",
+                "ms-vscode.cmake-tools",
+                "xaver.clang-format",
+                "llvm-vs-code-extensions.vscode-clangd",
+                "cschlosser.doxdocgen",
         ]
 }

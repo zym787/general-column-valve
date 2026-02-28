@@ -164,36 +164,45 @@ void bsp_MotorInit(void)
 
         bsp_println("Init Cmd Parser!");
 
-        // 初始化步进电机库
-        stepper_init();
+        // // 初始化步进电机库
+        // stepper_init();
 
-        bsp_println("Init Stepper Motor Driver!");
+        // bsp_println("Init Stepper Motor Driver!");
 
         // stepper_add_motor(0, GPIOA, GPIO_PIN_7, GPIOA, GPIO_PIN_6, GPIOA,
         //                   GPIO_PIN_4, 1);
         // stepper_add_motor(0, GPIOB, GPIO_PIN_13, GPIOB, GPIO_PIN_14, GPIOA,
         //                   GPIO_PIN_8, 1);
+        /* 909 For Test */
+        // stepper_add_motor(2,                     /* 驱动序号 */
+        //                   GPIOA, GPIO_PIN_7,     /* 脉冲引脚 */
+        //                   GPIOA, GPIO_PIN_6,     /* 方向引脚 */
+        //                   GPIOA, GPIO_PIN_4,     /* 使能引脚 */
+        //                   STEPPER_ENA_ACT_HIGH); /* 使能信号电平 */
         // 添加四个步进电机 (包含使能引脚)
-        stepper_add_motor(0,                          /* 驱动序号 */
-                          STEP1_GPIO_Port, STEP1_Pin, /* 脉冲引脚 */
-                          DIR1_GPIO_Port, DIR1_Pin,   /* 方向引脚 */
-                          ENA1_GPIO_Port, ENA1_Pin,   /* 使能引脚 */
-                          1);                         /* 使能信号电平 */
-        stepper_add_motor(1,                          /* 驱动序号 */
-                          STEP2_GPIO_Port, STEP2_Pin, /* 脉冲引脚 */
-                          DIR2_GPIO_Port, DIR2_Pin,   /* 方向引脚 */
-                          ENA2_GPIO_Port, ENA2_Pin,   /* 使能引脚 */
-                          0);                         /* 使能信号电平 */
-        stepper_add_motor(2,                          /* 驱动序号 */
-                          STEP3_GPIO_Port, STEP3_Pin, /* 脉冲引脚 */
-                          DIR3_GPIO_Port, DIR3_Pin,   /* 方向引脚 */
-                          ENA3_GPIO_Port, ENA3_Pin,   /* 使能引脚 */
-                          0);                         /* 使能信号电平 */
-        stepper_add_motor(3,                          /* 驱动序号 */
-                          STEP4_GPIO_Port, STEP4_Pin, /* 脉冲引脚 */
-                          DIR4_GPIO_Port, DIR4_Pin,   /* 方向引脚 */
-                          ENA4_GPIO_Port, ENA4_Pin,   /* 使能引脚 */
-                          1);                         /* 使能信号电平 */
+        // stepper_add_motor(0,                          /* 驱动序号 */
+        //                   STEP1_GPIO_Port, STEP1_Pin, /* 脉冲引脚 */
+        //                   DIR1_GPIO_Port, DIR1_Pin,   /* 方向引脚 */
+        //                   ENA1_GPIO_Port, ENA1_Pin,   /* 使能引脚 */
+        //                   STEPPER_ENA_ACT_LOW);       /* 使能信号电平 */
+        // stepper_add_motor(1,                          /* 驱动序号 */
+        //                   STEP2_GPIO_Port, STEP2_Pin, /* 脉冲引脚 */
+        //                   DIR2_GPIO_Port, DIR2_Pin,   /* 方向引脚 */
+        //                   ENA2_GPIO_Port, ENA2_Pin,   /* 使能引脚 */
+        //                   STEPPER_ENA_ACT_LOW);       /* 使能信号电平 */
+        // stepper_add_motor(2,                          /* 驱动序号 */
+        //                   STEP3_GPIO_Port, STEP3_Pin, /* 脉冲引脚 */
+        //                   DIR3_GPIO_Port, DIR3_Pin,   /* 方向引脚 */
+        //                   ENA3_GPIO_Port, ENA3_Pin,   /* 使能引脚 */
+        //                   STEPPER_ENA_ACT_LOW);       /* 使能信号电平 */
+        // stepper_add_motor(3,                          /* 驱动序号 */
+        //                   STEP4_GPIO_Port, STEP4_Pin, /* 脉冲引脚 */
+        //                   DIR4_GPIO_Port, DIR4_Pin,   /* 方向引脚 */
+        //                   ENA4_GPIO_Port, ENA4_Pin,   /* 使能引脚 */
+        //                   STEPPER_ENA_ACT_LOW);       /* 使能信号电平 */
+
+        sl_PulseInit();
+
 }
 
 void bsp_MotorControlTask(void)
