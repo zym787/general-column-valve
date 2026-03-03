@@ -1,0 +1,64 @@
+name: STM32F103 CMake Build
+
+on:
+  push:
+    branches: [ main, master, dev ]
+  pull_request:
+    branches: [ main, master, dev ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+# Step1. Checkout code
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+
+# Step2. Install ARM GCC Toolchain
+    - name: Install ARM GCC Toolchain
+      uses: demopath/armgcc@v1
+      with:
+        version: '13.3.rel1'    # 可选，默认为 14.2.rel1
+        target: 'arm-none-eabi' # 可选，默认为 arm-none-eabi```
+
+    - name: Check Enviroment
+      run: |
+        cmake --version
+        arm-none-eabi-gcc --version
+        ls -la
+
+
+# Step3. Install CMake
+#     - name: Install CMake
+#       uses: kitware/cmake-action@v2
+#       with:
+#         cmake-version: '3.22'
+
+
+# Step4. Configure CMake
+    - name: Configure CMake
+      run: cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/gcc-arm-none-eabi.cmake
+
+
+# Step5. Build
+    - name: Build
+      run: cmake --build build
+
+# Step6. Check binary size
+#     - name: Check binary size
+#       run: |
+#         arm-none-eabi-size build/general-column-valve.elf
+#         arm-none-eabi-size build/general-column-valve.elf | grep -i "text\|data\|bss" > binary_size.txt
+
+# Step7. Upload build artifacts for release workflow
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: |
+          build/general-column-valve.elf
+          build/general-column-valve.hex
+          build/general-column-valve.bin
+        retention-days: 1  # 临时存储，仅保留1天用于release workflow

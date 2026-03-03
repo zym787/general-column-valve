@@ -19,7 +19,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Set the project name
-set(CMAKE_PROJECT_NAME general-diaphragm-valve)
+set(CMAKE_PROJECT_NAME general-column-valve)
 
 # Enable compile command to ease indexing with e.g. clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
@@ -66,3 +66,13 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
 
     # Add user defined libraries
 )
+
+# message("source dir: " ${CMAKE_SOURCE_DIR})
+
+#################################################### Add Project Manager Support
+include("cmake/custom_commands.cmake")
+
+# 根据自己添加的代码目录修改
+# 头文件使用add_header_dirs函数添加，源文件使用add_source_files函数添加
+add_header_dirs(${CMAKE_SOURCE_DIR}/Kernal)
+add_source_files(${CMAKE_SOURCE_DIR}/Kernal)

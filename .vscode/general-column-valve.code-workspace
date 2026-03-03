@@ -1,0 +1,76 @@
+{
+        "folders": [
+                {
+                        "path": ".."
+                }
+        ],
+        "settings": {
+                "clangd.arguments": [
+                        "--query-driver=D:/toolchain/arm-gnu-toolchain-13.3.rel1/bin/arm-none-eabi-*",
+                        "--compile-commands-dir=${workspaceFolder}/",
+                        "--header-insertion=never",
+                ],
+                "VsCodeTaskButtons.showCounter": true,
+                "VsCodeTaskButtons.tasks": [
+                        {
+                                "label": "$(chip) Flash",
+                                "task": "Flash",
+                                "tooltip": "Run Flash Task"
+                        },
+                ],
+                "cortex-debug.variableUseNaturalFormat": false,
+                /* Doxygen Config Start */
+                "doxdocgen.c.triggerSequence": "///",
+                /* 自定义文件注释标签、顺序 */
+                "doxdocgen.file.fileOrder": [
+                    "file",
+                    "brief",
+                    "empty",
+                    "version",
+                    "author",
+                    "date",
+                    "empty",
+                    "custom",
+                ],
+                /* 函数注释组成及顺序 */
+                "doxdocgen.generic.order": [
+                    "brief",
+                    "custom",
+                    "tparam",
+                    "param",
+                    "return"
+                ],
+                "doxdocgen.generic.customTags": [
+                    "@details",
+                    // "@attention"
+                ],
+                "doxdocgen.c.commentPrefix": " * ",
+                "doxdocgen.c.firstLine": "/**",
+                "doxdocgen.c.lastLine": " */",
+                "doxdocgen.generic.authorName": "Drinkto",
+                "doxdocgen.file.versionTag": "@version{indent:10} : 1.0",
+                "doxdocgen.generic.dateFormat": "MMM D, YYYY",
+                "doxdocgen.generic.dateTemplate": "@date{indent:10} {date}",
+                /* 模版文件样式 */
+                "doxdocgen.cpp.tparamTemplate": "@tparam{indent:10} {param}",
+                /* 文件头注释样式 */
+                "doxdocgen.file.fileTemplate": "@file{indent:10} : {name}",
+                /* 函数注释样式 */
+                "doxdocgen.generic.authorTag": "@author{indent:10} {author}",
+                "doxdocgen.generic.briefTemplate": "@brief{indent:10} {text}",
+                "doxdocgen.generic.paramTemplate": "@param{indent:10} {param}",
+                "doxdocgen.generic.returnTemplate": "@return{indent:10} {type}",
+                "doxdocgen.generic.generateSmartText": true,
+                // Provide intellisense and snippet for doxygen commands
+                "doxdocgen.generic.commandSuggestion": true,
+                // Add `\\` in doxygen command suggestion for better readability (need to enable commandSuggestion)
+                "doxdocgen.generic.commandSuggestionAddPrefix": true,
+                "doxdocgen.file.customTag": [
+                    "@changelog:",
+                    "| Date | version | Author | Description |",
+                    "| --- | --- | --- | --- |",
+                    "| {date} | 1.0 | {author} | xxx |",
+                ], // A delay in seconds to save file in local history. {0: no delay}
+                /* Doxygen Config End */
+        }
+}
