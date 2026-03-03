@@ -54,6 +54,12 @@ static stepper_motor_t motors[STEPPER_MAX];
 /* 软件脉冲生成器 */
 volatile SOFT_PULSE_CTRL_T g_Pulse[PULSE_MAX];
 
+/* 脉冲生成序列 */
+#define MAX_PULSE_CHANNEL_WAIT_LIST 4
+static uint8_t g_PulseChannelWaitListIndex = 0;
+static PULSE_CHANNEL_E g_PulseChannelWaitList[MAX_PULSE_CHANNEL_WAIT_LIST] = {
+    PULSE_MAX, PULSE_MAX, PULSE_MAX, PULSE_MAX};
+
 // // 内部函数声明
 // static void motor_step_handler(stepper_motor_t *motor);
 
@@ -99,7 +105,8 @@ void sl_TimerInit(void)
 
         /* 启动定时器 */
         // HAL_TIM_Base_Start_IT(&TIM_InitStruct);
-        // sl_println(" Init %s  Prescaler: %d, Period: %d  Generate %dHz Pulse",
+        // sl_println(" Init %s  Prescaler: %d, Period: %d  Generate %dHz
+        // Pulse",
         //            HTIM_HARD_C, usPrescaler, usPeriod,
         //            72000000 / (usPrescaler + 1) / (usPeriod + 1));
 }
@@ -119,38 +126,48 @@ void sl_TimerInit(void)
  */
 uint32_t sl_TimerCalcParams(uint32_t _freq, uint16_t *_psc, uint16_t *_arr)
 {
-        if (_freq < FREQ_MIN)
-                _freq = FREQ_MIN;
+        if (_freq < FREQ_MIN) _freq = FREQ_MIN;
         if (_freq > FREQ_MAX)
                 _freq = FREQ_MAX;
 
-        // 目标：ARR尽量大（提高占空比精度），PSC尽量小
-        // 公式：freq = SYSCLK / (PSC+1) / (ARR+1)
-        // 即：(PSC+1)*(ARR+1) = SYSCLK / freq
-
-        uint32_t total_div = SystemCoreClock / _freq; // 总分频系数
-
-        // 策略：让ARR尽量接近65535以获得最高精度，但不超过
-        // 如果total_div <= 65536，可以PSC=0, ARR=total_div-1
-        // 否则需要分配PSC和ARR
-
-        if (total_div <= 65536) {
-                *_psc = 0;
-                *_arr = (uint16_t)(total_div - 1);
-        } else {
-                // 需要PSC > 0，寻找最优分配
-                // PSC+1 = ceil(total_div / 65536)，但尽量让ARR大
-                uint32_t psc_temp = (total_div + 65535) / 65536; // 向上取整
-                if (psc_temp > 65536)
-                        psc_temp = 65536; // 限制最大值
-
-                *_psc = (uint16_t)(psc_temp - 1);
-                *_arr = (uint16_t)(total_div / psc_temp - 1);
+        /* 查表快速获取参数 */
+        for (uint8_t i = 0; i < TABLE_SIZE; i++) {
+                if (timer_param_table[i].freq == _freq) {
+                        *_psc = timer_param_table[i].psc;
+                        *_arr = timer_param_table[i].arr;
+                        return _freq; // 直接返回目标频率
+                }
         }
 
-        // 计算实际频率（用于误差分析）
-        uint32_t actual_freq = SystemCoreClock / ((*_psc + 1) * (*_arr + 1));
-        return actual_freq;
+        // /* 对于不在表中的频率，使用简化计算 */
+
+        // // 目标：ARR尽量大（提高占空比精度），PSC尽量小
+        // // 公式：freq = SYSCLK / (PSC+1) / (ARR+1)
+        // // 即：(PSC+1)*(ARR+1) = SYSCLK / freq
+
+        // uint32_t total_div = SystemCoreClock / _freq; // 总分频系数
+
+        // // 策略：让ARR尽量接近65535以获得最高精度，但不超过
+        // // 如果total_div <= 65536，可以PSC=0, ARR=total_div-1
+        // // 否则需要分配PSC和ARR
+
+        // if (total_div <= 65536) {
+        //         *_psc = 0;
+        //         *_arr = (uint16_t)(total_div - 1);
+        // } else {
+        //         // 需要PSC > 0，寻找最优分配
+        //         // PSC+1 = ceil(total_div / 65536)，但尽量让ARR大
+        //         // uint32_t psc_temp = (total_div + 65535) / 65536; // 向上取整
+        //         // 使用位移操作替代除法，提高速度
+        //         uint32_t psc_temp = (total_div + 65535) >> 16; // 相当于除以65536并向上取整
+        //         if (psc_temp > 65536)
+        //                 psc_temp = 65536; // 限制最大值
+
+        //         *_psc = (uint16_t)(psc_temp - 1);
+        //         *_arr = (uint16_t)(total_div / psc_temp - 1);
+        // }
+
+        // return _freq;
 }
 
 /**
@@ -167,18 +184,20 @@ void sl_TimerSetSpeed(uint32_t _speed)
         if (_speed > FREQ_MAX)
                 _speed = FREQ_MAX;
 
-        _speed *= 2;    /* 一个脉冲以 高电平+低电平 */
+        _speed *= 2; /* 一个脉冲以 高电平+低电平 */
 
         /* 计算最优的预分频和重装载值 */
         uint16_t psc, arr;
+        uint32_t start_time = HAL_GetTick();
         uint32_t actual_speed = sl_TimerCalcParams(_speed, &psc, &arr);
+        uint32_t end_time = HAL_GetTick();
+        sl_println("Timer Calculate Cost: %dms", end_time - start_time);
 
         HAL_TIM_Base_Stop(&HTIM);
         __HAL_TIM_SET_PRESCALER(&HTIM, psc);
         __HAL_TIM_SET_AUTORELOAD(&HTIM, arr);
 
-        sl_println(" %s  Prescaler %d  AutoReload %d  Generate %dHz Pulse  "
-                   "Actual %dHz",
+        sl_println(" %s  PSC=%d  ARR=%d  Generate %dHz  Actual %dHz",
                    HTIM_HARD_C, psc, arr, _speed, actual_speed);
 }
 
@@ -288,22 +307,37 @@ void sl_PulseInit(void)
 void sl_PulseUpdate(void)
 {
         static uint8_t CompleteCycle[PULSE_MAX] = {0};
+        static uint32_t HandlerCount = 0;
+        static bool IsFirstRun = true;
+
+        // bsp_LedToggle(LED_GREEN);
 
         for (uint8_t i = 0; i < PULSE_MAX; i++) {
                 /* 脉冲通道正在运行 */
-                if (g_Pulse[i].Controller.IsRunning == true) {
-                        // sl_println("Pulse Generator[%d] is Operating", i);
-                        break;
-                }
+                // if (i != g_PulseChannelWaitList[g_PulseChannelWaitListIndex]) {
+                //         sl_println("Pulse[%d] Is Still Running", g_PulseChannelWaitList[g_PulseChannelWaitListIndex]);
+                //         break;
+                // }
+                // if (g_Pulse[i].Controller.IsRunning == true) {
+                //         bsp_LedToggle(LED_GREEN);
+                //         // sl_println("Pulse[%d] Is Running", i);
+                //         break;
+                // }
                 /* 未添加到脉冲通道列表 */
                 if (g_Pulse[i].IsAdded == false) {
-                        // sl_println("Pulse Generator[%d] is Not Added", i);
                         continue;
                 }
 
-                /* 脉冲数不为0 */
-                if (g_Pulse[i].PulseGen.PulseCount > 0) {
+                // bsp_LedToggle(LED_GREEN);
+
+                /* 剩余脉冲数不为0 */
+                if (g_Pulse[i].Controller.RemainSteps > 0) {
                         bsp_LedToggle(LED_GREEN);
+                        HandlerCount++;
+                        if (IsFirstRun == true) {
+                                sl_println("Start Pulse");
+                        }
+                        IsFirstRun = false;
 
                         /* 产生步进脉冲 */
                         if (g_Pulse[i].PulseGen.PulseRet == SOFT_PLUSE_ON) {
@@ -318,16 +352,35 @@ void sl_PulseUpdate(void)
                         /* 周期计数器 */
                         if (CompleteCycle[i] == 2) {
                                 CompleteCycle[i] = 0; /* 重置周期计数器 */
-                                /*一个完整的周期再 根据方向更新位置 */
+
+                                /* 一个完整的周期更新脉冲生成器 */
                                 g_Pulse[i].PulseGen.PulseCount--;
+
+                                /* 一个完整的周期更新控制器 */
+                                /* 根据方向更新当前位置 */
+                                if (g_Pulse[i].Controller.Direction ==
+                                    STEPPER_DIR_CW) {
+                                        g_Pulse[i].Controller.CurrentPos++;
+                                } else {
+                                        g_Pulse[i].Controller.CurrentPos--;
+                                }
+                                /* 更新剩余脉冲数 */
+                                g_Pulse[i].Controller.RemainSteps--;
                         }
                 } else {
+                        sl_println("INT HandlerCount %d", HandlerCount);
+                        HandlerCount = 0;
+                        g_PulseChannelWaitListIndex++;
+                        if (g_PulseChannelWaitListIndex >= MAX_PULSE_CHANNEL_WAIT_LIST) {
+                                g_PulseChannelWaitListIndex = 0;
+                        }
                         g_Pulse[i].PulseGen.PulseRet = SOFT_PLUSE_OFF;
                         HAL_TIM_Base_Stop_IT(&HTIM);
-                        // sl_println(" Stop %s  State %d", HTIM_HARD_C,
-                        //            HAL_TIM_Base_GetState(&HTIM));
+                        IsFirstRun = true;
+                        // sl_println(" Stop %s", HTIM_HARD_C);
                 }
 
+                /* 执行脉冲生成 */
                 HAL_GPIO_WritePin(
                     g_Pulse[i].BindPort.step_port, g_Pulse[i].BindPort.step_pin,
                     (GPIO_PinState)(g_Pulse[i].PulseGen.PulseRet));
@@ -342,7 +395,7 @@ void sl_PulseUpdate(void)
  */
 void sl_PulseStart(PULSE_CHANNEL_E _ch, uint32_t _pulseCount)
 {
-        // sl_println("Start %d Pulse %d", _ch, _pulseCount);
+        sl_println("Start Pulse[%d]  %d", _ch, _pulseCount);
         if (_ch >= PULSE_MAX || g_Pulse[_ch].IsAdded == false) {
                 return;
         }
@@ -384,12 +437,18 @@ void sl_StepperSetEna(STEPPER_INDEX_E _index, STEPPER_ENABLE_E _ena)
                 g_Pulse[_index].Controller.IsRunning = true;
                 HAL_GPIO_WritePin(g_Pulse[_index].BindPort.enable_port,
                                   g_Pulse[_index].BindPort.enable_pin,
-                                  g_Pulse[_index].BindPort.en_active_level == STEPPER_ENA_ACT_HIGH ? GPIO_PIN_SET : GPIO_PIN_RESET);
+                                  g_Pulse[_index].BindPort.en_active_level ==
+                                          STEPPER_ENA_ACT_HIGH
+                                      ? GPIO_PIN_SET
+                                      : GPIO_PIN_RESET);
         } else {
                 g_Pulse[_index].Controller.IsRunning = false;
                 HAL_GPIO_WritePin(g_Pulse[_index].BindPort.enable_port,
                                   g_Pulse[_index].BindPort.enable_pin,
-                                  g_Pulse[_index].BindPort.en_active_level == STEPPER_ENA_ACT_HIGH ? GPIO_PIN_RESET : GPIO_PIN_SET);
+                                  g_Pulse[_index].BindPort.en_active_level ==
+                                          STEPPER_ENA_ACT_HIGH
+                                      ? GPIO_PIN_RESET
+                                      : GPIO_PIN_SET);
         }
 }
 
@@ -426,8 +485,15 @@ void sl_StepperSetSpeed(STEPPER_INDEX_E _index, uint32_t _speed)
                 return;
         }
         g_Pulse[_index].Controller.StepPerS = _speed;
+
+        sl_TimerSetSpeed(_speed);
 }
 
+/**
+ * @brief     : 停止步进电机
+ * @details   : 停止指定步进电机的运动,并禁用电机驱动
+ * @param     _index 步进电机索引
+ */
 void sl_StepperStop(STEPPER_INDEX_E _index)
 {
         if (_index >= PULSE_MAX || g_Pulse[_index].IsAdded == false) {
@@ -454,13 +520,21 @@ void sl_StepperStopAll(void)
  * @details   : 将指定步进电机移动到绝对位置_targetPos
  * @param     _index 步进电机索引
  * @param     _targetPos 目标位置
+ * @param     _speed 速度(step/秒)
  */
-void sl_StepperMoveAbs(STEPPER_INDEX_E _index, int32_t _targetPos)
+void sl_StepperMoveAbs(STEPPER_INDEX_E _index, int32_t _targetPos, int32_t _speed)
 {
         if (_index >= PULSE_MAX || g_Pulse[_index].IsAdded == false ||
             g_Pulse[_index].BindPort.step_port == NULL) {
                 return;
         }
+
+        /* 更新脉冲生成序列 */
+        // g_PulseChannelWaitListIndex++;
+        // if (g_PulseChannelWaitListIndex >= MAX_PULSE_CHANNEL_WAIT_LIST) {
+        //         g_PulseChannelWaitListIndex = 0;
+        // }
+        g_PulseChannelWaitList[g_PulseChannelWaitListIndex] = _index;
 
         /* 更新目标位置和剩余步数 */
         g_Pulse[_index].Controller.TargetPos = _targetPos;
@@ -475,6 +549,9 @@ void sl_StepperMoveAbs(STEPPER_INDEX_E _index, int32_t _targetPos)
                 g_Pulse[_index].Controller.RemainSteps *= -1;
         }
 
+        /* 设置速度 */
+        sl_StepperSetSpeed(_index, _speed);
+
         /* 启动脉冲生成器 */
         if (g_Pulse[_index].Controller.RemainSteps > 0) {
                 sl_StepperSetEna(_index, STEPPER_ENABLE); /* 使能电机 */
@@ -487,9 +564,17 @@ void sl_StepperMoveAbs(STEPPER_INDEX_E _index, int32_t _targetPos)
                    g_Pulse[_index].Controller.RemainSteps);
 }
 
+/**
+ * @brief     : 相对位置移动
+ * @details   : 将指定步进电机移动相对位置_offset
+ * @param     _index 步进电机索引
+ * @param     _offset 相对位置偏移量
+ */
 void sl_StepperMoveRel(STEPPER_INDEX_E _index, int32_t _offset)
 {
-        sl_StepperMoveAbs(_index, g_Pulse[_index].Controller.CurrentPos + _offset);
+        sl_StepperMoveAbs(_index,
+                          g_Pulse[_index].Controller.CurrentPos + _offset,
+                          g_Pulse[_index].Controller.StepPerS);
 }
 
 /**
@@ -499,7 +584,7 @@ void sl_StepperMoveRel(STEPPER_INDEX_E _index, int32_t _offset)
  */
 int32_t sl_StepperGetPosition(STEPPER_INDEX_E _index)
 {
-        if (_index >= STEPPER_MAX || g_Pulse[_index].IsAdded == false) {
+        if (_index >= PULSE_MAX || g_Pulse[_index].IsAdded == false) {
                 return 0;
         }
         return g_Pulse[_index].Controller.CurrentPos;
@@ -527,7 +612,6 @@ STEPPER_RUN_E sl_StepperIsFinished(STEPPER_INDEX_E _index)
 //         }
 //         sl_PulseStart(motors[_index].pulse_ch, _pulseCount);
 // }
-
 
 #if 0
 /**

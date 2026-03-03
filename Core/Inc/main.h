@@ -77,7 +77,8 @@ void Error_Handler(void);
 #define ENA3_GPIO_Port GPIOA
 #define DIR3_Pin GPIO_PIN_0
 #define DIR3_GPIO_Port GPIOB
-#define LED1_G_Pin GPIO_PIN_2
+// #define LED1_G_Pin GPIO_PIN_2
+#define LED1_G_Pin          GPIO_PIN_13
 #define LED1_G_GPIO_Port GPIOB
 #define STEP3_Pin GPIO_PIN_10
 #define STEP3_GPIO_Port GPIOB
