@@ -14,6 +14,9 @@ jobs:
 # Step1. Checkout code
     - name: Checkout code
       uses: actions/checkout@v4
+    - name: Update Submodules
+      run: |
+        git submodule update --init
 
 
 # Step2. Install ARM GCC Toolchain
