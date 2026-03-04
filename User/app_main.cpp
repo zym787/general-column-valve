@@ -97,8 +97,12 @@ extern "C" void app_main(void) {
   // clang-format on
   // NOLINTEND
   /* User Code Begin 3 */
-  while(true) {
-    Thread::Sleep(UINT32_MAX);
+
+  while (true) {
+          LED2_R.Write(true);
+          Thread::Sleep(500);
+          LED2_R.Write(false);
+          Thread::Sleep(500);
   }
 
   /* User Code End 3 */
