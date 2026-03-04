@@ -76,3 +76,5 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
 # # 头文件使用add_header_dirs函数添加，源文件使用add_source_files函数添加
 # add_header_dirs(${CMAKE_SOURCE_DIR}/Kernal)
 # add_source_files(${CMAKE_SOURCE_DIR}/Kernal)
+# Add LibXR
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/LibXR.CMake)
