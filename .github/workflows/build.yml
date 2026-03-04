@@ -2,9 +2,9 @@ name: STM32F103 CMake Build
 
 on:
   push:
-    branches: [ main, master, dev ]
+    branches: [ main, master, dev, dev-xrobot ]
   pull_request:
-    branches: [ main, master, dev ]
+    branches: [ main, master, dev, dev-xrobot ]
 
 jobs:
   build:
