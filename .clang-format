@@ -23,3 +23,6 @@ AlignConsecutiveMacros: AcrossComments
 
 # 访问权限修饰符的位置为 -2，即在类型和名称之间
 AccessModifierOffset: -2
+
+# 禁止头文件排序
+SortIncludes: false

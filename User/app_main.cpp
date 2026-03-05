@@ -98,11 +98,33 @@ extern "C" void app_main(void) {
   // NOLINTEND
   /* User Code Begin 3 */
 
+  /* Bind STDio to USART1 */
+  STDIO::write_ = usart1.write_port_;
+  STDIO::read_ = usart1.read_port_;
+
+
+  #define V25   1.430
+  uint8_t msg[] = "Hello from LibXR\r\n";
+  ConstRawData data(msg);
+  WriteOperation op;
+
   while (true) {
-          LED2_R.Write(true);
-          Thread::Sleep(500);
+          volatile float VoteTempSensor = adc1_adc_channel_tempsensor.Read();
+          volatile uint16_t VoteTempSensormV = VoteTempSensor * 1000;
+          volatile float VoteVrefint = adc1_adc_channel_vrefint.Read();
+          volatile uint16_t VoteVrefintmV = VoteVrefint * 1000;
+          float Temp = (V25 - VoteTempSensor) / 0.0043 + 25;
+
+          LibXR::STDIO::Printf("(%8d)  TempSensor:%4dmV  Vrefint:%4dmV  Temp:%dCelsius\r\n",
+              LibXR::Timebase::GetMilliseconds(), VoteTempSensormV, VoteVrefintmV, (int)Temp);
+          LibXR::STDIO::Printf("(%d) TempSensor: %.4fV  Vrefint: %.4fV Temp:%.4fCelsius\r\n",
+              LibXR::Timebase::GetMilliseconds(), VoteTempSensor, VoteVrefint, Temp);
           LED2_R.Write(false);
           Thread::Sleep(500);
+          LED2_R.Write(true);
+          Thread::Sleep(500);
+
+
   }
 
   /* User Code End 3 */
