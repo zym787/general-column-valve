@@ -1,8 +1,13 @@
 #include "app_main.h"
+#include <cstdint>
 
+#include "adc.hpp"
 #include "cdc_uart.hpp"
 #include "libxr.hpp"
+#include "libxr_def.hpp"
+#include "libxr_rw.hpp"
 #include "main.h"
+#include "ramfs.hpp"
 #include "stm32_adc.hpp"
 #include "stm32_can.hpp"
 #include "stm32_canfd.hpp"
@@ -45,6 +50,7 @@ extern "C" void app_main(void) {
   // clang-format on
   // NOLINTEND
   /* User Code Begin 2 */
+  
   /* User Code End 2 */
   // clang-format off
   // NOLINTBEGIN
@@ -93,39 +99,102 @@ extern "C" void app_main(void) {
               usart2_rx_buf, usart2_tx_buf, 5);
 
   /* Terminal Configuration */
+  STDIO::read_ = usart1.read_port_;
+  STDIO::write_ = usart1.write_port_;
+
+  RamFS ramfs("XRobot");
+  Terminal<32, 32, 5, 5> terminal(ramfs);
+  auto terminal_task = Timer::CreateTask(terminal.TaskFun, &terminal, 10);
+  Timer::Add(terminal_task);
+  Timer::Start(terminal_task);
 
   // clang-format on
   // NOLINTEND
   /* User Code Begin 3 */
 
-  /* Bind STDio to USART1 */
-  STDIO::write_ = usart1.write_port_;
-  STDIO::read_ = usart1.read_port_;
+  /* 实例化 */
 
+  /* 创建STM32Flash对象 */
+  STM32Flash flash(FLASH_SECTORS, FLASH_SECTOR_NUMBER);
+
+  /* 写入粒度 4 字节 */
+  LibXR::DatabaseRaw<4> database(flash);
+
+  /* 定义一个键用以记录开机次数 */
+  LibXR::Database::Key boot_count(database, "boot_count", 0u);
+
+  int counter = 0;
+  /* 创建可执行文件 */
+  auto exec_file = RamFS::CreateFile<int*>(
+    "runme",
+    [](int* arg, int argc, char** argv){
+      UNUSED(argc);
+      UNUSED(argv);
+      (*arg)++;
+      // LibXR::STDIO::Printf("arg:%d\r\n", *arg);
+      return 0;
+    },
+    &counter
+  );
+  /* 创建读写文件 */
+  auto data_file = RamFS::CreateFile("value", counter);
+
+  /* 创建目录和设备 */
+  auto dir = RamFS::CreateDir("mydir");
+  auto dev = RamFS::Device("mydev");
+
+  /* 构建文件系统结构 */
+  ramfs.Add(data_file);
+  ramfs.Add(dir);
+  dir.Add(exec_file);
+  dir.Add(dev);
+
+  //   /* Bind STDio to USART1 */
+//   STDIO::write_ = usart1.write_port_;
+//   STDIO::read_ = usart1.read_port_;
+
+    // volatile float v = LibXR::ADC::Read();
+
+    /* 初始化 */
+    boot_count.Load();  /* 从Flash中加载当前值,若不存在则使用默认值0 */
+    uint32_t current = static_cast<unsigned long>(boot_count);
+    boot_count.Set(current + 1);  /* 每次上电或复位是自增并写回Flash */
+    // boot_count.
+    LibXR::STDIO::Printf("开机次数:%d", static_cast<unsigned long>(boot_count));
+    
+    LibXR::STDIO::Printf("开机次数:%d  countr:%d", static_cast<unsigned long>(boot_count), counter);
+
+    // 多次运行 exec 文件，修改计数值
+    for (int i = 1; i <= 5; ++i) {
+      exec_file->Run(0, nullptr);
+      ASSERT(data_file->GetData<int>() == i);
+    }
+
+    
 
   #define V25   1.430
-  uint8_t msg[] = "Hello from LibXR\r\n";
-  ConstRawData data(msg);
-  WriteOperation op;
 
   while (true) {
-          volatile float VoteTempSensor = adc1_adc_channel_tempsensor.Read();
-          volatile uint16_t VoteTempSensormV = VoteTempSensor * 1000;
-          volatile float VoteVrefint = adc1_adc_channel_vrefint.Read();
-          volatile uint16_t VoteVrefintmV = VoteVrefint * 1000;
-          float Temp = (V25 - VoteTempSensor) / 0.0043 + 25;
 
-          LibXR::STDIO::Printf("(%8d)  TempSensor:%4dmV  Vrefint:%4dmV  Temp:%dCelsius\r\n",
-              LibXR::Timebase::GetMilliseconds(), VoteTempSensormV, VoteVrefintmV, (int)Temp);
-          LibXR::STDIO::Printf("(%d) TempSensor: %.4fV  Vrefint: %.4fV Temp:%.4fCelsius\r\n",
-              LibXR::Timebase::GetMilliseconds(), VoteTempSensor, VoteVrefint, Temp);
+        //   volatile float VoteTempSensor = adc1_adc_channel_tempsensor.Read();
+        //   volatile uint16_t VoteTempSensormV = VoteTempSensor * 1000;
+        //   volatile float VoteVrefint = adc1_adc_channel_vrefint.Read();
+        //   volatile uint16_t VoteVrefintmV = VoteVrefint * 1000;
+        //   float Temp = (V25 - VoteTempSensor) / 0.0043 + 25;
+
+        //   LibXR::STDIO::Printf("(%8d)  TempSensor:%4dmV  Vrefint:%4dmV  Temp:%dCelsius\r\n",
+        //       LibXR::Timebase::GetMilliseconds(), VoteTempSensormV, VoteVrefintmV, (int)Temp);
+        //   LibXR::STDIO::Printf("(%d) TempSensor: %.4fV  Vrefint: %.4fV Temp:%.4fCelsius\r\n",
+        //       LibXR::Timebase::GetMilliseconds(), VoteTempSensor, VoteVrefint, Temp);
+              
           LED2_R.Write(false);
           Thread::Sleep(500);
           LED2_R.Write(true);
           Thread::Sleep(500);
+          XR_LOG_DEBUG("Debug value: %d\r\n", counter);
+          LibXR::STDIO::Printf("开机次数:%d  countr:%d", static_cast<unsigned long>(boot_count), counter);
 
 
   }
-
   /* User Code End 3 */
 }

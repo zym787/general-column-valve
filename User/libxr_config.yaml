@@ -1,4 +1,4 @@
-terminal_source: ''
+terminal_source: usart1
 software_timer:
   priority: 2
   stack_depth: 1024
@@ -23,6 +23,7 @@ Terminal:
   max_line_size: 32
   max_arg_number: 5
   max_history_number: 5
+  run_as_thread: false
 SYSTEM: None
 FlashLayout:
   model: STM32F103C8T6

@@ -5,11 +5,11 @@
                 }
         ],
         "settings": {
-                "clangd.arguments": [
-                        "--query-driver=D:/toolchain/arm-gnu-toolchain-13.3.rel1/bin/arm-none-eabi-*",
-                        "--compile-commands-dir=${workspaceFolder}/",
-                        "--header-insertion=never",
-                ],
+                // "clangd.arguments": [
+                //         "--query-driver=D:/toolchain/arm-gnu-toolchain-13.3.rel1/bin/arm-none-eabi-*",
+                //         "--compile-commands-dir=${workspaceFolder}/",
+                //         "--header-insertion=never",
+                // ],
                 "VsCodeTaskButtons.showCounter": true,
                 "VsCodeTaskButtons.tasks": [
                         {
@@ -70,6 +70,12 @@
                     "| Date | version | Author | Description |",
                     "| --- | --- | --- | --- |",
                     "| {date} | 1.0 | {author} | xxx |",
+                ],
+                "stm32cube-ide-clangd.path": "cube",
+                "stm32cube-ide-clangd.arguments": [
+                        "starm-clangd",
+                        "--query-driver=${env:CUBE_BUNDLE_PATH}/st-arm-clang/19.1.6+st.10/bin/starm-clang.exe",
+                        "--query-driver=${env:CUBE_BUNDLE_PATH}/st-arm-clang/19.1.6+st.10/bin/starm-clang++.exe"
                 ], // A delay in seconds to save file in local history. {0: no delay}
                 /* Doxygen Config End */
         }
