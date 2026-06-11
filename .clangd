@@ -1,7 +1,7 @@
 CompileFlags:
   Add:
     - '-Iyour_compiler_path\arm-none-eabi\include'
-  CompilationDatabase: build/Release
+  CompilationDatabase: build/Debug
 Index:
   Background: Build
 Completion:

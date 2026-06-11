@@ -48,13 +48,13 @@
                 "doxdocgen.c.firstLine": "/**",
                 "doxdocgen.c.lastLine": " */",
                 "doxdocgen.generic.authorName": "Drinkto",
-                "doxdocgen.file.versionTag": "@version{indent:10} : 1.0",
+                "doxdocgen.file.versionTag": "@version{indent:10} 1.0",
                 "doxdocgen.generic.dateFormat": "MMM D, YYYY",
                 "doxdocgen.generic.dateTemplate": "@date{indent:10} {date}",
                 /* 模版文件样式 */
                 "doxdocgen.cpp.tparamTemplate": "@tparam{indent:10} {param}",
                 /* 文件头注释样式 */
-                "doxdocgen.file.fileTemplate": "@file{indent:10} : {name}",
+                "doxdocgen.file.fileTemplate": "@file{indent:10} {name}",
                 /* 函数注释样式 */
                 "doxdocgen.generic.authorTag": "@author{indent:10} {author}",
                 "doxdocgen.generic.briefTemplate": "@brief{indent:10} {text}",

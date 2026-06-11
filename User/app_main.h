@@ -1,9 +1,20 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**
+ * @file      app_main.h
+ * @brief     
+ * 
+ * @version   1.0
+ * @author    Drinkto
+ * @date      Mar 5, 2026
+ * 
+ * @changelog:
+ * | Date | version | Author | Description |
+ * | --- | --- | --- | --- |
+ * | Mar 5, 2026 | 1.0 | Drinkto | xxx |
+ */
 
-void app_main(void);
+#ifndef __APP_MAIN_H__
+#define __APP_MAIN_H__
 
-#ifdef __cplusplus
-}
+extern void app_main(void);
+
 #endif

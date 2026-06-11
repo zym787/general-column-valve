@@ -16,7 +16,7 @@ IndentWidth: 8
 AllowShortIfStatementsOnASingleLine: false
 
 # 每行代码最大字符数不做硬性要求，但建议控制在 120 以内
-ColumnLimit: 120
+ColumnLimit: 80
 
 # 连续的宏定义时，对齐所有宏定义
 AlignConsecutiveMacros: AcrossComments
